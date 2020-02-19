@@ -7,26 +7,31 @@ import static spark.Spark.put;
 import static spark.Spark.delete;
 
 import me.vitor.taskapp_sparkjava.controller.TaskController;
+import me.vitor.taskapp_sparkjava.model.TaskRepositoryHibernate;
+import me.vitor.taskapp_sparkjava.service.TaskService;
 import me.vitor.taskapp_sparkjava.transformer.JsonTransformer;
 
 public class App {
 
-  private static final String PATH_TASK = "/task";
-  private static final String PATH_ID = ":id";
-  private static final String PATH_TASK_WITH_ID = PATH_TASK + "/" + PATH_ID;
+    private static final String PATH_TASK = "/task";
+    private static final String PATH_ID = ":id";
+    private static final String PATH_TASK_WITH_ID = PATH_TASK + "/" + PATH_ID;
 
-  public static void main(String[] args) {
-    App app = new App();
-    app.setup();
-  }
+    public static void main(String[] args) {
+        App app = new App();
+        app.setup();
+    }
 
-  private void setup() {
-    get(PATH_TASK, TaskController::getTasks, new JsonTransformer());
-    get(PATH_TASK_WITH_ID, TaskController::getTask, new JsonTransformer());
-    post(PATH_TASK, TaskController::postTask);
-    put(PATH_TASK_WITH_ID, TaskController::putTask);
-    patch(PATH_TASK_WITH_ID, TaskController::patchTask);
-    delete(PATH_TASK_WITH_ID, TaskController::deleteTask);
-  }
+    private void setup() {
+
+        TaskController controller = new TaskController(new TaskService(new TaskRepositoryHibernate()));
+
+        get(PATH_TASK, controller::getTasks, new JsonTransformer());
+        get(PATH_TASK_WITH_ID, controller::getTask, new JsonTransformer());
+        post(PATH_TASK, controller::postTask);
+        put(PATH_TASK_WITH_ID, controller::putTask);
+        patch(PATH_TASK_WITH_ID, controller::patchTask);
+        delete(PATH_TASK_WITH_ID, controller::deleteTask);
+    }
 
 }

@@ -2,6 +2,16 @@
 
 set -o errexit
 
+if [ "x$1" = "x" ] ; then
+	echo "Parameters : 
+  <base_url> <number of repeats> <req_count> <interval> 
+eg
+http://localhost:4567/ 10  100 1 
+would make 10 sets of 100 requests with a 1 sec pause between sets
+"
+exit
+fi
+
 run() {
   # input parameters
   local base_url=$1
