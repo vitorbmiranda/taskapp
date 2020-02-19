@@ -8,49 +8,51 @@ import org.hibernate.query.Query;
 
 public class TaskRepositoryHibernate implements TaskRepository {
 
-  private static SessionFactory factory = new Configuration().configure().buildSessionFactory();
+    private static SessionFactory factory = new Configuration().configure().buildSessionFactory();
 
-  @Override
-  public Task findBy(Long id) {
-    Session session = factory.openSession();
-    Query query = session.createQuery("FROM Task where id = :id");
-    query.setParameter("id", id);
-    List<Task> tasks = query.list();
-    session.close();
+    @Override
+    public Task findBy(Long id) {
+        List<Task> tasks;
+        try (Session session = factory.openSession()) {
+            Query query = session.createQuery("FROM Task where id = :id");
+            query.setParameter("id", id);
+            tasks = query.list();
+        }
 
-    if (tasks == null || tasks.isEmpty()) {
-      return null;
+        if (tasks == null || tasks.isEmpty()) {
+            return null;
+        }
+        return tasks.get(0);
     }
-    return tasks.get(0);
-  }
 
-  @Override
-  public List<Task> findAll() {
-    Session session = factory.openSession();
-    List<Task> tasks = session.createQuery("FROM Task").list();
-    session.close();
-    return tasks;
-  }
+    @Override
+    public List<Task> findAll() {
+        List<Task> tasks;
+        try (Session session = factory.openSession()) {
+            tasks = session.createQuery("FROM Task").list();
+        }
+        return tasks;
+    }
 
-  @Override
-  public Task save(Task task) {
-    Session session = factory.openSession();
-    session.beginTransaction();
-    session.saveOrUpdate(task);
-    session.getTransaction().commit();
-    session.close();
-    return task;
-  }
+    @Override
+    public Task save(Task task) {
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            session.saveOrUpdate(task);
+            session.getTransaction().commit();
+        }
+        return task;
+    }
 
-  @Override
-  public void deleteById(Long id) {
-    Session session = factory.openSession();
-    session.beginTransaction();
-    Task task = new Task();
-    task.setId(id);
-    session.remove(task);
-    session.getTransaction().commit();
-    session.close();
-  }
+    @Override
+    public void deleteById(Long id) {
+        try (Session session = factory.openSession()) {
+            session.beginTransaction();
+            Task task = new Task();
+            task.setId(id);
+            session.remove(task);
+            session.getTransaction().commit();
+        }
+    }
 
 }
